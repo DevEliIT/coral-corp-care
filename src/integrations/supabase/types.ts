@@ -52,38 +52,94 @@ export type Database = {
       }
       company_contacts: {
         Row: {
+          birth_date: string | null
           company_id: string
+          contact_type: Database["public"]["Enums"]["contact_type"] | null
+          cpf: string | null
           created_at: string | null
           decision_role: Database["public"]["Enums"]["decision_role"] | null
           email: string | null
           id: string
+          landline_phone: string | null
+          mobile_phone: string | null
           name: string
           phone: string | null
+          rg: string | null
           role: string | null
         }
         Insert: {
+          birth_date?: string | null
           company_id: string
+          contact_type?: Database["public"]["Enums"]["contact_type"] | null
+          cpf?: string | null
           created_at?: string | null
           decision_role?: Database["public"]["Enums"]["decision_role"] | null
           email?: string | null
           id?: string
+          landline_phone?: string | null
+          mobile_phone?: string | null
           name: string
           phone?: string | null
+          rg?: string | null
           role?: string | null
         }
         Update: {
+          birth_date?: string | null
           company_id?: string
+          contact_type?: Database["public"]["Enums"]["contact_type"] | null
+          cpf?: string | null
           created_at?: string | null
           decision_role?: Database["public"]["Enums"]["decision_role"] | null
           email?: string | null
           id?: string
+          landline_phone?: string | null
+          mobile_phone?: string | null
           name?: string
           phone?: string | null
+          rg?: string | null
           role?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "company_contacts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_documents: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_type: string | null
+          id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_type?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_type?: string | null
+          id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_documents_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -130,29 +186,29 @@ export type Database = {
         Row: {
           active: boolean | null
           base_price: number
-          carrier: string
           created_at: string | null
           id: string
           name: string
           notes: string | null
+          request_type: Database["public"]["Enums"]["request_type"] | null
         }
         Insert: {
           active?: boolean | null
           base_price: number
-          carrier: string
           created_at?: string | null
           id?: string
           name: string
           notes?: string | null
+          request_type?: Database["public"]["Enums"]["request_type"] | null
         }
         Update: {
           active?: boolean | null
           base_price?: number
-          carrier?: string
           created_at?: string | null
           id?: string
           name?: string
           notes?: string | null
+          request_type?: Database["public"]["Enums"]["request_type"] | null
         }
         Relationships: []
       }
@@ -176,6 +232,107 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
         }
         Relationships: []
+      }
+      proposal_attachments: {
+        Row: {
+          created_at: string | null
+          file_name: string
+          file_path: string
+          file_type: string | null
+          id: string
+          proposal_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          file_name: string
+          file_path: string
+          file_type?: string | null
+          id?: string
+          proposal_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          file_name?: string
+          file_path?: string
+          file_type?: string | null
+          id?: string
+          proposal_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_attachments_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_cedents: {
+        Row: {
+          birth_date: string | null
+          contact_id: string | null
+          cpf: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          is_existing_contact: boolean | null
+          landline_phone: string | null
+          mobile_phone: string | null
+          name: string | null
+          proposal_id: string
+          rg: string | null
+          role: string | null
+        }
+        Insert: {
+          birth_date?: string | null
+          contact_id?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_existing_contact?: boolean | null
+          landline_phone?: string | null
+          mobile_phone?: string | null
+          name?: string | null
+          proposal_id: string
+          rg?: string | null
+          role?: string | null
+        }
+        Update: {
+          birth_date?: string | null
+          contact_id?: string | null
+          cpf?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          is_existing_contact?: boolean | null
+          landline_phone?: string | null
+          mobile_phone?: string | null
+          name?: string | null
+          proposal_id?: string
+          rg?: string | null
+          role?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_cedents_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "company_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proposal_cedents_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: true
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       proposal_status_history: {
         Row: {
@@ -216,11 +373,17 @@ export type Database = {
         Row: {
           company_id: string
           created_at: string | null
+          donor_carrier: string | null
           id: string
           line_quantity: number
           notes: string | null
+          operational_status:
+            | Database["public"]["Enums"]["operational_status"]
+            | null
           plan_id: string | null
           price_per_line: number
+          product: string | null
+          request_type: Database["public"]["Enums"]["request_type"] | null
           seller_id: string | null
           sent_at: string | null
           status: Database["public"]["Enums"]["proposal_status"]
@@ -230,11 +393,17 @@ export type Database = {
         Insert: {
           company_id: string
           created_at?: string | null
+          donor_carrier?: string | null
           id?: string
           line_quantity: number
           notes?: string | null
+          operational_status?:
+            | Database["public"]["Enums"]["operational_status"]
+            | null
           plan_id?: string | null
           price_per_line: number
+          product?: string | null
+          request_type?: Database["public"]["Enums"]["request_type"] | null
           seller_id?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["proposal_status"]
@@ -244,11 +413,17 @@ export type Database = {
         Update: {
           company_id?: string
           created_at?: string | null
+          donor_carrier?: string | null
           id?: string
           line_quantity?: number
           notes?: string | null
+          operational_status?:
+            | Database["public"]["Enums"]["operational_status"]
+            | null
           plan_id?: string | null
           price_per_line?: number
+          product?: string | null
+          request_type?: Database["public"]["Enums"]["request_type"] | null
           seller_id?: string | null
           sent_at?: string | null
           status?: Database["public"]["Enums"]["proposal_status"]
@@ -272,17 +447,49 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: { Args: { _role: string; _user_id: string }; Returns: boolean }
       is_manager: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "seller" | "manager"
       company_status: "lead" | "proposal" | "active" | "lost"
+      contact_type: "legal_representative" | "account_manager" | "cedent"
       decision_role: "decision_maker" | "influencer" | "financial"
+      operational_status:
+        | "analysis"
+        | "documentation"
+        | "activation"
+        | "completed"
+        | "cancelled"
       proposal_status:
         | "qualified"
         | "diagnosis"
@@ -290,6 +497,7 @@ export type Database = {
         | "negotiation"
         | "signed"
         | "lost"
+      request_type: "portability" | "new_line" | "migration"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -419,7 +627,15 @@ export const Constants = {
     Enums: {
       app_role: ["seller", "manager"],
       company_status: ["lead", "proposal", "active", "lost"],
+      contact_type: ["legal_representative", "account_manager", "cedent"],
       decision_role: ["decision_maker", "influencer", "financial"],
+      operational_status: [
+        "analysis",
+        "documentation",
+        "activation",
+        "completed",
+        "cancelled",
+      ],
       proposal_status: [
         "qualified",
         "diagnosis",
@@ -428,6 +644,7 @@ export const Constants = {
         "signed",
         "lost",
       ],
+      request_type: ["portability", "new_line", "migration"],
     },
   },
 } as const

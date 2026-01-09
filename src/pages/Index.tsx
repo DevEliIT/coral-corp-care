@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { ProposalWithRelations, ProposalStatus } from '@/types/crm';
+import { ProposalWithRelations, ProposalStatus, OperationalStatus } from '@/types/crm';
 import AppLayout from '@/components/layout/AppLayout';
 import MetricCard from '@/components/dashboard/MetricCard';
 import PipelineChart from '@/components/dashboard/PipelineChart';
 import KanbanBoard from '@/components/proposals/KanbanBoard';
+import OperationalKanban from '@/components/proposals/OperationalKanban';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Building2, FileText, FileSignature, TrendingUp, Plus, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -114,6 +116,22 @@ export default function Dashboard() {
     }
   };
 
+  const handleOperationalStatusChange = async (proposalId: string, newStatus: OperationalStatus) => {
+    try {
+      const { error } = await supabase
+        .from('proposals')
+        .update({ operational_status: newStatus })
+        .eq('id', proposalId);
+
+      if (error) throw error;
+
+      toast({ title: 'Status operacional atualizado!' });
+      fetchData();
+    } catch (error) {
+      toast({ variant: 'destructive', title: 'Erro ao atualizar status' });
+    }
+  };
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -193,10 +211,24 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle>Pipeline de Vendas</CardTitle>
+              <CardTitle>Pipeline</CardTitle>
             </CardHeader>
             <CardContent>
-              <KanbanBoard proposals={proposals} onStatusChange={handleStatusChange} />
+              <Tabs defaultValue="sales" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="sales">Vendas</TabsTrigger>
+                  <TabsTrigger value="operational">Operacional</TabsTrigger>
+                </TabsList>
+                <TabsContent value="sales">
+                  <KanbanBoard proposals={proposals} onStatusChange={handleStatusChange} />
+                </TabsContent>
+                <TabsContent value="operational">
+                  <OperationalKanban 
+                    proposals={proposals.filter(p => p.status === 'signed')} 
+                    onStatusChange={handleOperationalStatusChange} 
+                  />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 
