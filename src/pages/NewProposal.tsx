@@ -105,6 +105,7 @@ export default function NewProposal() {
         price_per_line: parseFloat(form.price_per_line),
         notes: form.notes || null,
         status: 'qualified',
+        sales_status: 'proposta_enviada',
         product: form.product || null,
         request_type: form.request_type || null,
         donor_carrier: form.donor_carrier || null,

@@ -382,10 +382,17 @@ export type Database = {
             | null
           plan_id: string | null
           price_per_line: number
+          processing_status:
+            | Database["public"]["Enums"]["processing_pipeline_status"]
+            | null
           product: string | null
           request_type: Database["public"]["Enums"]["request_type"] | null
+          sales_status:
+            | Database["public"]["Enums"]["sales_pipeline_status"]
+            | null
           seller_id: string | null
           sent_at: string | null
+          sent_to_bko_at: string | null
           status: Database["public"]["Enums"]["proposal_status"]
           total_monthly: number | null
           updated_at: string | null
@@ -402,10 +409,17 @@ export type Database = {
             | null
           plan_id?: string | null
           price_per_line: number
+          processing_status?:
+            | Database["public"]["Enums"]["processing_pipeline_status"]
+            | null
           product?: string | null
           request_type?: Database["public"]["Enums"]["request_type"] | null
+          sales_status?:
+            | Database["public"]["Enums"]["sales_pipeline_status"]
+            | null
           seller_id?: string | null
           sent_at?: string | null
+          sent_to_bko_at?: string | null
           status?: Database["public"]["Enums"]["proposal_status"]
           total_monthly?: number | null
           updated_at?: string | null
@@ -422,10 +436,17 @@ export type Database = {
             | null
           plan_id?: string | null
           price_per_line?: number
+          processing_status?:
+            | Database["public"]["Enums"]["processing_pipeline_status"]
+            | null
           product?: string | null
           request_type?: Database["public"]["Enums"]["request_type"] | null
+          sales_status?:
+            | Database["public"]["Enums"]["sales_pipeline_status"]
+            | null
           seller_id?: string | null
           sent_at?: string | null
+          sent_to_bko_at?: string | null
           status?: Database["public"]["Enums"]["proposal_status"]
           total_monthly?: number | null
           updated_at?: string | null
@@ -490,6 +511,29 @@ export type Database = {
         | "activation"
         | "completed"
         | "cancelled"
+      processing_pipeline_status:
+        | "troca_carteira"
+        | "gerar_contrato"
+        | "auditoria_assinatura"
+        | "pendente_input"
+        | "chamado_aberto"
+        | "pendente_estoque"
+        | "ativo"
+        | "instalada"
+        | "logistica"
+        | "pendente_instalacao"
+        | "ag_portabilidade"
+        | "ag_autorizacao_sms"
+        | "analise_credito"
+        | "ag_validacao"
+        | "validacao_pendente"
+        | "pendente_assinatura"
+        | "reprovado_bko"
+        | "para_correcao"
+        | "reprovado_troca_carteira"
+        | "credito_reprovado"
+        | "cancelado"
+        | "ag_faturamento"
       proposal_status:
         | "qualified"
         | "diagnosis"
@@ -498,6 +542,10 @@ export type Database = {
         | "signed"
         | "lost"
       request_type: "portability" | "new_line" | "migration"
+      sales_pipeline_status:
+        | "proposta_enviada"
+        | "ag_documentacao"
+        | "enviado_bko"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -636,6 +684,30 @@ export const Constants = {
         "completed",
         "cancelled",
       ],
+      processing_pipeline_status: [
+        "troca_carteira",
+        "gerar_contrato",
+        "auditoria_assinatura",
+        "pendente_input",
+        "chamado_aberto",
+        "pendente_estoque",
+        "ativo",
+        "instalada",
+        "logistica",
+        "pendente_instalacao",
+        "ag_portabilidade",
+        "ag_autorizacao_sms",
+        "analise_credito",
+        "ag_validacao",
+        "validacao_pendente",
+        "pendente_assinatura",
+        "reprovado_bko",
+        "para_correcao",
+        "reprovado_troca_carteira",
+        "credito_reprovado",
+        "cancelado",
+        "ag_faturamento",
+      ],
       proposal_status: [
         "qualified",
         "diagnosis",
@@ -645,6 +717,11 @@ export const Constants = {
         "lost",
       ],
       request_type: ["portability", "new_line", "migration"],
+      sales_pipeline_status: [
+        "proposta_enviada",
+        "ag_documentacao",
+        "enviado_bko",
+      ],
     },
   },
 } as const
