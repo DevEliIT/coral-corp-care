@@ -9,13 +9,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, Loader2, Plus } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import ContactForm, { ContactFormData, emptyContactForm } from '@/components/contacts/ContactForm';
 import FileUpload from '@/components/uploads/FileUpload';
 import { ContactType } from '@/types/crm';
 
 export default function NewCompany() {
-  const { user } = useAuth();
+  const { user, isManager } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -25,7 +25,6 @@ export default function NewCompany() {
   // Contatos obrigatórios
   const [legalRepresentative, setLegalRepresentative] = useState<ContactFormData>(emptyContactForm('legal_representative'));
   const [accountManager, setAccountManager] = useState<ContactFormData>(emptyContactForm('account_manager'));
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -149,6 +148,7 @@ export default function NewCompany() {
                   onUpload={(files) => setDocuments([...documents, ...files])}
                   existingFiles={documents}
                   onRemove={(path) => setDocuments(documents.filter((d) => d.path !== path))}
+                  canRemove={isManager}
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                 />
               </div>

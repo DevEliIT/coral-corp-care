@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   ChevronLeft,
+  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -26,6 +27,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { label: 'Dashboard', icon: <LayoutDashboard className="h-5 w-5" />, path: '/' },
   { label: 'Empresas', icon: <Building2 className="h-5 w-5" />, path: '/empresas' },
+  { label: 'Contatos', icon: <Users className="h-5 w-5" />, path: '/contatos' },
   { label: 'Propostas', icon: <FileText className="h-5 w-5" />, path: '/propostas' },
   { label: 'Contratos', icon: <FileSignature className="h-5 w-5" />, path: '/contratos' },
   { label: 'Planos', icon: <Package className="h-5 w-5" />, path: '/planos' },

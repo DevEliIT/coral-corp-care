@@ -38,7 +38,7 @@ const emptyCedent: CedentForm = {
 };
 
 export default function NewProposal() {
-  const { user } = useAuth();
+  const { user, isManager } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -304,6 +304,7 @@ export default function NewProposal() {
                   onUpload={(files) => setAttachments([...attachments, ...files])}
                   existingFiles={attachments}
                   onRemove={(path) => setAttachments(attachments.filter((a) => a.path !== path))}
+                  canRemove={isManager}
                 />
               </div>
 
