@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -13,10 +13,16 @@ import {
   X,
   ChevronLeft,
   Users,
+  UsersRound,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+
+interface NavItem {
+  label: string;
+  icon: ReactNode;
+  path: string;
+  managerOnly?: boolean;
+}
 
 interface NavItem {
   label: string;
@@ -31,6 +37,7 @@ const navItems: NavItem[] = [
   { label: 'Propostas', icon: <FileText className="h-5 w-5" />, path: '/propostas' },
   { label: 'Contratos', icon: <FileSignature className="h-5 w-5" />, path: '/contratos' },
   { label: 'Planos', icon: <Package className="h-5 w-5" />, path: '/planos' },
+  { label: 'Equipe', icon: <UsersRound className="h-5 w-5" />, path: '/equipe', managerOnly: true },
 ];
 
 interface AppLayoutProps {
@@ -38,7 +45,7 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children }: AppLayoutProps) {
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, isManager } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -66,27 +73,29 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => {
-          const isActive = location.pathname === item.path || 
-            (item.path !== '/' && location.pathname.startsWith(item.path));
-          
-          return (
-            <button
-              key={item.path}
-              onClick={() => {
-                navigate(item.path);
-                setMobileMenuOpen(false);
-              }}
-              className={cn(
-                'sidebar-nav-item w-full',
-                isActive && 'sidebar-nav-item-active'
-              )}
-            >
-              {item.icon}
-              {sidebarOpen && <span>{item.label}</span>}
-            </button>
-          );
-        })}
+        {navItems
+          .filter((item) => !item.managerOnly || isManager)
+          .map((item) => {
+            const isActive = location.pathname === item.path || 
+              (item.path !== '/' && location.pathname.startsWith(item.path));
+            
+            return (
+              <button
+                key={item.path}
+                onClick={() => {
+                  navigate(item.path);
+                  setMobileMenuOpen(false);
+                }}
+                className={cn(
+                  'sidebar-nav-item w-full',
+                  isActive && 'sidebar-nav-item-active'
+                )}
+              >
+                {item.icon}
+                {sidebarOpen && <span>{item.label}</span>}
+              </button>
+            );
+          })}
       </nav>
 
       <div className="px-3 py-4 border-t border-sidebar-border">
