@@ -2,12 +2,11 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { ProposalWithRelations, ProposalStatus, OperationalStatus } from '@/types/crm';
+import { ProposalWithRelations, SalesPipelineStatus, ProcessingPipelineStatus } from '@/types/crm';
 import AppLayout from '@/components/layout/AppLayout';
 import MetricCard from '@/components/dashboard/MetricCard';
-import PipelineChart from '@/components/dashboard/PipelineChart';
-import KanbanBoard from '@/components/proposals/KanbanBoard';
-import OperationalKanban from '@/components/proposals/OperationalKanban';
+import SalesPipelineKanban from '@/components/proposals/SalesPipelineKanban';
+import ProcessingPipelineKanban from '@/components/proposals/ProcessingPipelineKanban';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -15,17 +14,28 @@ import { Building2, FileText, FileSignature, TrendingUp, Plus, Loader2 } from 'l
 import { useToast } from '@/hooks/use-toast';
 
 export default function Dashboard() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, profile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [proposals, setProposals] = useState<ProposalWithRelations[]>([]);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
   const [metrics, setMetrics] = useState({
     totalNegotiating: 0,
     contractsThisMonth: 0,
     avgTicket: 0,
     totalCompanies: 0,
   });
+
+  // Check if user can edit in each view
+  const isManager = profile?.role === 'manager';
+  const isBackoffice = userRoles.includes('backoffice') || isManager;
+  const isSeller = userRoles.includes('seller') || profile?.role === 'seller';
+
+  // Sellers can edit in Prospecção (sales pipeline)
+  // Only Backoffice/Manager can edit in Tramitação (processing pipeline)
+  const canEditSalesPipeline = isSeller || isManager;
+  const canEditProcessingPipeline = isBackoffice;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -36,8 +46,15 @@ export default function Dashboard() {
   useEffect(() => {
     if (user) {
       fetchData();
+      fetchUserRoles();
     }
   }, [user]);
+
+  const fetchUserRoles = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+    setUserRoles((data || []).map((r) => r.role));
+  };
 
   const fetchData = async () => {
     try {
@@ -50,13 +67,13 @@ export default function Dashboard() {
       setProposals((proposalsData || []) as ProposalWithRelations[]);
 
       const negotiating = (proposalsData || [])
-        .filter((p: any) => ['sent', 'negotiation'].includes(p.status))
+        .filter((p: any) => p.sales_status && !p.processing_status)
         .reduce((sum: number, p: any) => sum + (p.total_monthly || 0), 0);
 
-      const signed = (proposalsData || []).filter((p: any) => p.status === 'signed');
-      const contractsThisMonth = signed.length;
-      const avgTicket = signed.length > 0
-        ? signed.reduce((sum: number, p: any) => sum + (p.total_monthly || 0), 0) / signed.length
+      const active = (proposalsData || []).filter((p: any) => p.processing_status === 'ativo');
+      const contractsThisMonth = active.length;
+      const avgTicket = active.length > 0
+        ? active.reduce((sum: number, p: any) => sum + (p.total_monthly || 0), 0) / active.length
         : 0;
 
       const { count: companiesCount } = await supabase
@@ -76,38 +93,27 @@ export default function Dashboard() {
     }
   };
 
-  const handleStatusChange = async (proposalId: string, newStatus: ProposalStatus) => {
-    const proposal = proposals.find((p) => p.id === proposalId);
-    if (!proposal) return;
+  const handleSalesStatusChange = async (proposalId: string, newStatus: SalesPipelineStatus) => {
+    if (!canEditSalesPipeline) {
+      toast({ variant: 'destructive', title: 'Sem permissão para alterar' });
+      return;
+    }
 
     try {
+      const updateData: any = { sales_status: newStatus };
+      
+      // When moving to "enviado_bko", mark the timestamp and move to processing
+      if (newStatus === 'enviado_bko') {
+        updateData.sent_to_bko_at = new Date().toISOString();
+        updateData.processing_status = 'troca_carteira';
+      }
+
       const { error } = await supabase
         .from('proposals')
-        .update({ status: newStatus })
+        .update(updateData)
         .eq('id', proposalId);
 
       if (error) throw error;
-
-      await supabase.from('proposal_status_history').insert({
-        proposal_id: proposalId,
-        old_status: proposal.status,
-        new_status: newStatus,
-        changed_by: user?.id,
-      });
-
-      if (newStatus === 'signed') {
-        await supabase.from('contracts').insert({
-          proposal_id: proposalId,
-          start_date: new Date().toISOString().split('T')[0],
-        });
-        
-        if (proposal.company_id) {
-          await supabase
-            .from('companies')
-            .update({ status: 'active' })
-            .eq('id', proposal.company_id);
-        }
-      }
 
       toast({ title: 'Status atualizado!' });
       fetchData();
@@ -116,11 +122,16 @@ export default function Dashboard() {
     }
   };
 
-  const handleOperationalStatusChange = async (proposalId: string, newStatus: OperationalStatus) => {
+  const handleProcessingStatusChange = async (proposalId: string, newStatus: ProcessingPipelineStatus) => {
+    if (!canEditProcessingPipeline) {
+      toast({ variant: 'destructive', title: 'Vendedor não pode movimentar nessa etapa' });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('proposals')
-        .update({ operational_status: newStatus })
+        .update({ processing_status: newStatus })
         .eq('id', proposalId);
 
       if (error) throw error;
@@ -140,16 +151,9 @@ export default function Dashboard() {
     }).format(value);
   };
 
-  const pipelineData = proposals.reduce((acc, p) => {
-    const existing = acc.find((item) => item.status === p.status);
-    if (existing) {
-      existing.count++;
-      existing.value += p.total_monthly || 0;
-    } else {
-      acc.push({ status: p.status, count: 1, value: p.total_monthly || 0 });
-    }
-    return acc;
-  }, [] as { status: ProposalStatus; count: number; value: number }[]);
+  // Filter proposals for each view
+  const salesProposals = proposals.filter((p) => p.sales_status && !p.processing_status);
+  const processingProposals = proposals.filter((p) => p.processing_status);
 
   if (authLoading || loading) {
     return (
@@ -183,15 +187,15 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <MetricCard
-            title="Em Negociação"
+            title="Em Prospecção"
             value={formatCurrency(metrics.totalNegotiating)}
-            subtitle="Propostas ativas"
+            subtitle="Propostas em vendas"
             icon={<TrendingUp className="h-6 w-6 text-primary" />}
           />
           <MetricCard
-            title="Contratos no Mês"
+            title="Ativos no Mês"
             value={metrics.contractsThisMonth}
-            subtitle="Fechados este mês"
+            subtitle="Contratos ativos"
             icon={<FileSignature className="h-6 w-6 text-primary" />}
           />
           <MetricCard
@@ -208,39 +212,43 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Pipeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="sales" className="w-full">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="sales">Vendas</TabsTrigger>
-                  <TabsTrigger value="operational">Operacional</TabsTrigger>
-                </TabsList>
-                <TabsContent value="sales">
-                  <KanbanBoard proposals={proposals} onStatusChange={handleStatusChange} />
-                </TabsContent>
-                <TabsContent value="operational">
-                  <OperationalKanban 
-                    proposals={proposals.filter(p => p.status === 'signed')} 
-                    onStatusChange={handleOperationalStatusChange} 
-                  />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Resumo do Funil</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PipelineChart data={pipelineData} />
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Pipeline</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="prospeccao" className="w-full">
+              <TabsList className="mb-4">
+                <TabsTrigger value="prospeccao">
+                  Visão Prospecção
+                  <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                    {salesProposals.length}
+                  </span>
+                </TabsTrigger>
+                <TabsTrigger value="tramitacao">
+                  Visão Tramitação
+                  <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                    {processingProposals.length}
+                  </span>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="prospeccao">
+                <SalesPipelineKanban 
+                  proposals={salesProposals} 
+                  onStatusChange={handleSalesStatusChange}
+                  canEdit={canEditSalesPipeline}
+                />
+              </TabsContent>
+              <TabsContent value="tramitacao">
+                <ProcessingPipelineKanban 
+                  proposals={processingProposals} 
+                  onStatusChange={handleProcessingStatusChange}
+                  canEdit={canEditProcessingPipeline}
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       </div>
     </AppLayout>
   );

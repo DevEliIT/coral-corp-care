@@ -12,6 +12,33 @@ export type OperationalStatus = 'analysis' | 'documentation' | 'activation' | 'c
 
 export type RequestType = 'portability' | 'new_line' | 'migration';
 
+// New Pipeline Types
+export type SalesPipelineStatus = 'proposta_enviada' | 'ag_documentacao' | 'enviado_bko';
+
+export type ProcessingPipelineStatus = 
+  | 'troca_carteira'
+  | 'gerar_contrato'
+  | 'auditoria_assinatura'
+  | 'pendente_input'
+  | 'chamado_aberto'
+  | 'pendente_estoque'
+  | 'ativo'
+  | 'instalada'
+  | 'logistica'
+  | 'pendente_instalacao'
+  | 'ag_portabilidade'
+  | 'ag_autorizacao_sms'
+  | 'analise_credito'
+  | 'ag_validacao'
+  | 'validacao_pendente'
+  | 'pendente_assinatura'
+  | 'reprovado_bko'
+  | 'para_correcao'
+  | 'reprovado_troca_carteira'
+  | 'credito_reprovado'
+  | 'cancelado'
+  | 'ag_faturamento';
+
 export interface Profile {
   id: string;
   role: AppRole;
@@ -22,7 +49,7 @@ export interface Profile {
 export interface UserRole {
   id: string;
   user_id: string;
-  role: AppRole;
+  role: string;
   created_by: string | null;
   created_at: string;
 }
@@ -91,6 +118,9 @@ export interface Proposal {
   request_type: RequestType | null;
   donor_carrier: string | null;
   operational_status: OperationalStatus | null;
+  sales_status: SalesPipelineStatus | null;
+  processing_status: ProcessingPipelineStatus | null;
+  sent_to_bko_at: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -198,6 +228,70 @@ export const APP_ROLE_LABELS: Record<AppRole, string> = {
   post_sale: 'Pós-Venda',
   backoffice: 'Backoffice',
 };
+
+// Sales Pipeline Labels (Visão Prospecção)
+export const SALES_PIPELINE_LABELS: Record<SalesPipelineStatus, string> = {
+  proposta_enviada: 'Proposta Enviada',
+  ag_documentacao: 'AG Documentação',
+  enviado_bko: 'Enviado Bko',
+};
+
+export const SALES_PIPELINE_ORDER: SalesPipelineStatus[] = [
+  'proposta_enviada',
+  'ag_documentacao',
+  'enviado_bko',
+];
+
+// Processing Pipeline Labels (Visão Tramitação)
+export const PROCESSING_PIPELINE_LABELS: Record<ProcessingPipelineStatus, string> = {
+  troca_carteira: 'Troca de Carteira',
+  gerar_contrato: 'Gerar Contrato',
+  auditoria_assinatura: 'Auditoria / Assinatura',
+  pendente_input: 'Pendente Input',
+  chamado_aberto: 'Chamado Aberto',
+  pendente_estoque: 'Pendente Estoque',
+  ativo: 'Ativo',
+  instalada: 'Instalada',
+  logistica: 'Logística',
+  pendente_instalacao: 'Pendente Instalação',
+  ag_portabilidade: 'AG Portabilidade',
+  ag_autorizacao_sms: 'AG Autorização SMS-Cliente',
+  analise_credito: 'Análise de Crédito',
+  ag_validacao: 'Ag Validação',
+  validacao_pendente: 'Validação Pendente',
+  pendente_assinatura: 'Pendente Assinatura',
+  reprovado_bko: 'Reprovado Bko',
+  para_correcao: 'Para Correção',
+  reprovado_troca_carteira: 'Reprovado Troca de Carteira',
+  credito_reprovado: 'Crédito Reprovado',
+  cancelado: 'Cancelado',
+  ag_faturamento: 'AG Faturamento',
+};
+
+export const PROCESSING_PIPELINE_ORDER: ProcessingPipelineStatus[] = [
+  'troca_carteira',
+  'gerar_contrato',
+  'auditoria_assinatura',
+  'pendente_input',
+  'chamado_aberto',
+  'pendente_estoque',
+  'ativo',
+  'instalada',
+  'logistica',
+  'pendente_instalacao',
+  'ag_portabilidade',
+  'ag_autorizacao_sms',
+  'analise_credito',
+  'ag_validacao',
+  'validacao_pendente',
+  'pendente_assinatura',
+  'reprovado_bko',
+  'para_correcao',
+  'reprovado_troca_carteira',
+  'credito_reprovado',
+  'cancelado',
+  'ag_faturamento',
+];
 
 export const PROPOSAL_STATUS_ORDER: ProposalStatus[] = [
   'qualified',
