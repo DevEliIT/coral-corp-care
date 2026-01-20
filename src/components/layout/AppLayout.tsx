@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   Users,
   UsersRound,
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -104,6 +105,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
             {profile.full_name}
           </p>
         )}
+        <button
+          onClick={() => {
+            navigate('/configuracoes');
+            setMobileMenuOpen(false);
+          }}
+          className={cn(
+            'sidebar-nav-item w-full mb-1',
+            location.pathname === '/configuracoes' && 'sidebar-nav-item-active'
+          )}
+        >
+          <Settings className="h-5 w-5" />
+          {sidebarOpen && <span>Configurações</span>}
+        </button>
         <button
           onClick={handleSignOut}
           className="sidebar-nav-item w-full text-sidebar-foreground/60 hover:text-red-400"
