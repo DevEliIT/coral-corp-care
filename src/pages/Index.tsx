@@ -27,15 +27,18 @@ export default function Dashboard() {
     totalCompanies: 0,
   });
 
-  // Check if user can edit in each view
+  // Check user roles for view visibility and edit permissions
   const isManager = profile?.role === 'manager';
-  const isBackoffice = userRoles.includes('backoffice') || isManager;
+  const isBackoffice = userRoles.includes('backoffice');
   const isSeller = userRoles.includes('seller') || profile?.role === 'seller';
 
-  // Sellers can edit in Prospecção (sales pipeline)
-  // Only Backoffice/Manager can edit in Tramitação (processing pipeline)
+  // Visibility: Sellers see only Prospecção, Backoffice sees only Tramitação, Manager sees both
+  const canViewSalesPipeline = isSeller || isManager;
+  const canViewProcessingPipeline = isBackoffice || isManager;
+
+  // Edit permissions
   const canEditSalesPipeline = isSeller || isManager;
-  const canEditProcessingPipeline = isBackoffice;
+  const canEditProcessingPipeline = isBackoffice || isManager;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -217,35 +220,43 @@ export default function Dashboard() {
             <CardTitle>Pipeline</CardTitle>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="prospeccao" className="w-full">
+            <Tabs defaultValue={canViewSalesPipeline ? "prospeccao" : "tramitacao"} className="w-full">
               <TabsList className="mb-4">
-                <TabsTrigger value="prospeccao">
-                  Visão Prospecção
-                  <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                    {salesProposals.length}
-                  </span>
-                </TabsTrigger>
-                <TabsTrigger value="tramitacao">
-                  Visão Tramitação
-                  <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
-                    {processingProposals.length}
-                  </span>
-                </TabsTrigger>
+                {canViewSalesPipeline && (
+                  <TabsTrigger value="prospeccao">
+                    Visão Prospecção
+                    <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                      {salesProposals.length}
+                    </span>
+                  </TabsTrigger>
+                )}
+                {canViewProcessingPipeline && (
+                  <TabsTrigger value="tramitacao">
+                    Visão Tramitação
+                    <span className="ml-2 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full">
+                      {processingProposals.length}
+                    </span>
+                  </TabsTrigger>
+                )}
               </TabsList>
-              <TabsContent value="prospeccao">
-                <SalesPipelineKanban 
-                  proposals={salesProposals} 
-                  onStatusChange={handleSalesStatusChange}
-                  canEdit={canEditSalesPipeline}
-                />
-              </TabsContent>
-              <TabsContent value="tramitacao">
-                <ProcessingPipelineKanban 
-                  proposals={processingProposals} 
-                  onStatusChange={handleProcessingStatusChange}
-                  canEdit={canEditProcessingPipeline}
-                />
-              </TabsContent>
+              {canViewSalesPipeline && (
+                <TabsContent value="prospeccao">
+                  <SalesPipelineKanban 
+                    proposals={salesProposals} 
+                    onStatusChange={handleSalesStatusChange}
+                    canEdit={canEditSalesPipeline}
+                  />
+                </TabsContent>
+              )}
+              {canViewProcessingPipeline && (
+                <TabsContent value="tramitacao">
+                  <ProcessingPipelineKanban 
+                    proposals={processingProposals} 
+                    onStatusChange={handleProcessingStatusChange}
+                    canEdit={canEditProcessingPipeline}
+                  />
+                </TabsContent>
+              )}
             </Tabs>
           </CardContent>
         </Card>
