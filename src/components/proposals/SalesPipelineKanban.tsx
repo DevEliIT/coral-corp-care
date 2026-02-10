@@ -122,7 +122,8 @@ export default function SalesPipelineKanban({ proposals, onStatusChange, canEdit
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
 
               {columnProposals.length === 0 && (
                 <p className="text-center text-sm text-muted-foreground py-8">
