@@ -94,7 +94,7 @@ export default function SalesPipelineKanban({ proposals, onStatusChange, canEdit
                 <div
                   key={proposal.id}
                   draggable={canEdit && !isLocked}
-                  onDragStart={(e) => handleDragStart(e, proposal.id)}
+                  onDragStart={(e) => handleDragStart(e, proposal)}
                   onClick={() => navigate(`/propostas/${proposal.id}`)}
                   className={cn(
                     'bg-card rounded-lg p-4 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow border-t-4',
