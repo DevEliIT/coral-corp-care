@@ -155,7 +155,7 @@ export default function Dashboard() {
   };
 
   // Filter proposals for each view
-  const salesProposals = proposals.filter((p) => p.sales_status && !p.processing_status);
+  const salesProposals = proposals.filter((p) => p.sales_status && (!p.processing_status || p.sales_status === 'enviado_bko'));
   const processingProposals = proposals.filter((p) => p.processing_status);
 
   if (authLoading || loading) {

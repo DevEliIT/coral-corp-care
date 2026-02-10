@@ -98,7 +98,7 @@ export default function SalesPipelineKanban({ proposals, onStatusChange, canEdit
                   className={cn(
                     'bg-card rounded-lg p-4 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow border-t-4',
                     statusColors[status],
-                    !canEdit && 'cursor-default'
+                    (!canEdit || isLocked) && 'cursor-default opacity-70'
                   )}
                 >
                   <div className="flex items-start gap-2 mb-2">
