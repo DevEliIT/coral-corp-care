@@ -37,12 +37,13 @@ export default function SalesPipelineKanban({ proposals, onStatusChange, canEdit
     return proposals.filter((p) => p.sales_status === status);
   };
 
-  const handleDragStart = (e: React.DragEvent, proposalId: string) => {
-    if (!canEdit) {
+  const handleDragStart = (e: React.DragEvent, proposal: ProposalWithRelations) => {
+    const isLocked = proposal.sales_status === 'enviado_bko' && !!proposal.processing_status;
+    if (!canEdit || isLocked) {
       e.preventDefault();
       return;
     }
-    e.dataTransfer.setData('proposalId', proposalId);
+    e.dataTransfer.setData('proposalId', proposal.id);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
