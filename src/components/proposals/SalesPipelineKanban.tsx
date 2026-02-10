@@ -37,12 +37,13 @@ export default function SalesPipelineKanban({ proposals, onStatusChange, canEdit
     return proposals.filter((p) => p.sales_status === status);
   };
 
-  const handleDragStart = (e: React.DragEvent, proposalId: string) => {
-    if (!canEdit) {
+  const handleDragStart = (e: React.DragEvent, proposal: ProposalWithRelations) => {
+    const isLocked = proposal.sales_status === 'enviado_bko' && !!proposal.processing_status;
+    if (!canEdit || isLocked) {
       e.preventDefault();
       return;
     }
-    e.dataTransfer.setData('proposalId', proposalId);
+    e.dataTransfer.setData('proposalId', proposal.id);
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -87,16 +88,18 @@ export default function SalesPipelineKanban({ proposals, onStatusChange, canEdit
             </div>
 
             <div className="space-y-3">
-              {columnProposals.map((proposal) => (
+              {columnProposals.map((proposal) => {
+                const isLocked = proposal.sales_status === 'enviado_bko' && !!proposal.processing_status;
+                return (
                 <div
                   key={proposal.id}
-                  draggable={canEdit}
-                  onDragStart={(e) => handleDragStart(e, proposal.id)}
+                  draggable={canEdit && !isLocked}
+                  onDragStart={(e) => handleDragStart(e, proposal)}
                   onClick={() => navigate(`/propostas/${proposal.id}`)}
                   className={cn(
                     'bg-card rounded-lg p-4 shadow-sm border border-border cursor-pointer hover:shadow-md transition-shadow border-t-4',
                     statusColors[status],
-                    !canEdit && 'cursor-default'
+                    (!canEdit || isLocked) && 'cursor-default opacity-70'
                   )}
                 >
                   <div className="flex items-start gap-2 mb-2">
@@ -120,7 +123,8 @@ export default function SalesPipelineKanban({ proposals, onStatusChange, canEdit
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
 
               {columnProposals.length === 0 && (
                 <p className="text-center text-sm text-muted-foreground py-8">
