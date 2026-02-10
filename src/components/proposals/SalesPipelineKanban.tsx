@@ -87,10 +87,12 @@ export default function SalesPipelineKanban({ proposals, onStatusChange, canEdit
             </div>
 
             <div className="space-y-3">
-              {columnProposals.map((proposal) => (
+              {columnProposals.map((proposal) => {
+                const isLocked = proposal.sales_status === 'enviado_bko' && !!proposal.processing_status;
+                return (
                 <div
                   key={proposal.id}
-                  draggable={canEdit}
+                  draggable={canEdit && !isLocked}
                   onDragStart={(e) => handleDragStart(e, proposal.id)}
                   onClick={() => navigate(`/propostas/${proposal.id}`)}
                   className={cn(
