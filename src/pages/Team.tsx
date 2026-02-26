@@ -164,21 +164,20 @@ export default function Team() {
                   <Label>Papéis *</Label>
                   <div className="grid grid-cols-2 gap-2">
                     {ROLE_OPTIONS.map((role) => (
-                      <div
+                      <label
                         key={role.value}
-                        className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-colors ${
-                          form.roles.includes(role.value) ? 'border-primary bg-primary/5' : 'border-border'
-                        }`}
-                        onClick={() => toggleRole(role.value)}
+                        htmlFor={`role-${role.value}`}
+                        className={`flex items-center space-x-2 p-3 rounded-lg border cursor-pointer transition-colors ${form.roles.includes(role.value) ? 'border-primary bg-primary/5' : 'border-border'
+                          }`}
                       >
-                        <Checkbox 
-                          checked={form.roles.includes(role.value)} 
+                        <Checkbox
+                          id={`role-${role.value}`}
+                          checked={form.roles.includes(role.value)}
                           onCheckedChange={() => toggleRole(role.value)}
-                          onClick={(e) => e.stopPropagation()}
                         />
                         <role.icon className="h-4 w-4" />
                         <span className="text-sm">{role.label}</span>
-                      </div>
+                      </label>
                     ))}
                   </div>
                 </div>
