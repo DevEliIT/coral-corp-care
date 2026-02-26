@@ -171,7 +171,11 @@ export default function Team() {
                         }`}
                         onClick={() => toggleRole(role.value)}
                       >
-                        <Checkbox checked={form.roles.includes(role.value)} />
+                        <Checkbox 
+                          checked={form.roles.includes(role.value)} 
+                          onCheckedChange={() => toggleRole(role.value)}
+                          onClick={(e) => e.stopPropagation()}
+                        />
                         <role.icon className="h-4 w-4" />
                         <span className="text-sm">{role.label}</span>
                       </div>

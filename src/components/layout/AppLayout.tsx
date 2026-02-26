@@ -77,9 +77,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
         {navItems
           .filter((item) => !item.managerOnly || isManager)
           .map((item) => {
-            const isActive = location.pathname === item.path || 
+            const isActive = location.pathname === item.path ||
               (item.path !== '/' && location.pathname.startsWith(item.path));
-            
+
             return (
               <button
                 key={item.path}
@@ -147,7 +147,74 @@ export default function AppLayout({ children }: AppLayoutProps) {
             !sidebarOpen && 'rotate-180'
           )} />
         </button>
-        <NavContent />
+
+        <div className="flex items-center gap-3 px-4 py-6 border-b border-sidebar-border">
+          <div className="h-10 w-10 rounded-lg bg-sidebar-primary/10 flex items-center justify-center shrink-0">
+            <Phone className="h-5 w-5 text-sidebar-primary" />
+          </div>
+          {sidebarOpen && (
+            <div className="overflow-hidden">
+              <h1 className="font-bold text-sidebar-foreground text-lg">TeleCRM</h1>
+              <p className="text-xs text-sidebar-foreground/60 truncate">
+                {profile?.role === 'manager' ? 'Gestor' : 'Vendedor'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          {navItems
+            .filter((item) => !item.managerOnly || isManager)
+            .map((item) => {
+              const isActive = location.pathname === item.path ||
+                (item.path !== '/' && location.pathname.startsWith(item.path));
+
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => {
+                    navigate(item.path);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={cn(
+                    'sidebar-nav-item w-full',
+                    isActive && 'sidebar-nav-item-active'
+                  )}
+                >
+                  {item.icon}
+                  {sidebarOpen && <span>{item.label}</span>}
+                </button>
+              );
+            })}
+        </nav>
+
+        <div className="px-3 py-4 border-t border-sidebar-border">
+          {sidebarOpen && profile?.full_name && (
+            <p className="text-sm text-sidebar-foreground/60 mb-3 px-3 truncate">
+              {profile.full_name}
+            </p>
+          )}
+          <button
+            onClick={() => {
+              navigate('/configuracoes');
+              setMobileMenuOpen(false);
+            }}
+            className={cn(
+              'sidebar-nav-item w-full mb-1',
+              location.pathname === '/configuracoes' && 'sidebar-nav-item-active'
+            )}
+          >
+            <Settings className="h-5 w-5" />
+            {sidebarOpen && <span>Configurações</span>}
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="sidebar-nav-item w-full text-sidebar-foreground/60 hover:text-red-400"
+          >
+            <LogOut className="h-5 w-5" />
+            {sidebarOpen && <span>Sair</span>}
+          </button>
+        </div>
       </aside>
 
       {/* Mobile Menu Button */}
@@ -160,7 +227,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 bg-foreground/50 z-50"
           onClick={() => setMobileMenuOpen(false)}
         />
@@ -179,7 +246,74 @@ export default function AppLayout({ children }: AppLayoutProps) {
         >
           <X className="h-4 w-4 text-sidebar-foreground" />
         </button>
-        <NavContent />
+
+        <div className="flex items-center gap-3 px-4 py-6 border-b border-sidebar-border">
+          <div className="h-10 w-10 rounded-lg bg-sidebar-primary/10 flex items-center justify-center shrink-0">
+            <Phone className="h-5 w-5 text-sidebar-primary" />
+          </div>
+          {sidebarOpen && (
+            <div className="overflow-hidden">
+              <h1 className="font-bold text-sidebar-foreground text-lg">TeleCRM</h1>
+              <p className="text-xs text-sidebar-foreground/60 truncate">
+                {profile?.role === 'manager' ? 'Gestor' : 'Vendedor'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          {navItems
+            .filter((item) => !item.managerOnly || isManager)
+            .map((item) => {
+              const isActive = location.pathname === item.path ||
+                (item.path !== '/' && location.pathname.startsWith(item.path));
+
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => {
+                    navigate(item.path);
+                    setMobileMenuOpen(false);
+                  }}
+                  className={cn(
+                    'sidebar-nav-item w-full',
+                    isActive && 'sidebar-nav-item-active'
+                  )}
+                >
+                  {item.icon}
+                  {sidebarOpen && <span>{item.label}</span>}
+                </button>
+              );
+            })}
+        </nav>
+
+        <div className="px-3 py-4 border-t border-sidebar-border">
+          {sidebarOpen && profile?.full_name && (
+            <p className="text-sm text-sidebar-foreground/60 mb-3 px-3 truncate">
+              {profile.full_name}
+            </p>
+          )}
+          <button
+            onClick={() => {
+              navigate('/configuracoes');
+              setMobileMenuOpen(false);
+            }}
+            className={cn(
+              'sidebar-nav-item w-full mb-1',
+              location.pathname === '/configuracoes' && 'sidebar-nav-item-active'
+            )}
+          >
+            <Settings className="h-5 w-5" />
+            {sidebarOpen && <span>Configurações</span>}
+          </button>
+          <button
+            onClick={handleSignOut}
+            className="sidebar-nav-item w-full text-sidebar-foreground/60 hover:text-red-400"
+          >
+            <LogOut className="h-5 w-5" />
+            {sidebarOpen && <span>Sair</span>}
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
